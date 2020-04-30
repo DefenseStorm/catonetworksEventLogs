@@ -38,8 +38,10 @@ class integration(object):
                     local_file.write(f.read())
             except HTTPError, e:
                 self.ds.log('ERROR', '%s %s' %(e.code, url))
+                return
             except URLError, e:
                 self.ds.log('ERROR', '%s %s' %(e.reason, url))
+                pass
             retcode = f.getcode()
     
             if retcode == 200:
@@ -72,8 +74,10 @@ class integration(object):
                         local_file.write(f.read())
                 except HTTPError, e:
                     self.ds.log('ERROR', '%s %s' %(e.code, url))
+                    return
                 except URLError, e:
                     self.ds.log('ERROR', '%s %s' %(e.reason, url))
+                    pass
                 retcode = f.getcode()
                 if retcode == 200:
                     mystate['last'] += 1
