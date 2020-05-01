@@ -6,6 +6,7 @@ import os
 from urllib2 import urlopen, URLError, HTTPError
 from zipfile import ZipFile
 from StringIO import StringIO
+from datetime import datetime
 
 sys.path.insert(0, './ds-integration')
 from DefenseStorm import DefenseStorm
@@ -13,6 +14,14 @@ from DefenseStorm import DefenseStorm
 num_failures = 5
 
 class integration(object):
+
+    def convertTime(self, mystring):
+        start = mystring.find("rt=")
+        timestring = mystring[start + 3:start + 31]
+        dt = datetime.strptime(timestring, "%a %b %d %H:%M:%S %Z %Y")
+        epoch = (dt - datetime(1970,1,1)).total_seconds()
+        newline = mystring[:start+3] + "%d" %epoch + mystring[start + 31:]
+        return newline
 
     def get_logs(self):
         bucket = self.ds.config_get('cato', 'BUCKET')
@@ -37,7 +46,8 @@ class integration(object):
                 with open(filename, "wb") as local_file:
                     local_file.write(f.read())
             except HTTPError, e:
-                self.ds.log('ERROR', '%s %s' %(e.code, url))
+                if e.code != 403:
+                    self.ds.log('ERROR', '%s %s' %(e.code, url))
                 return
             except URLError, e:
                 self.ds.log('ERROR', '%s %s' %(e.reason, url))
@@ -58,8 +68,8 @@ class integration(object):
                         event_list += foofile.readlines()
                     os.remove(filename)
                     for line in event_list:
+                        line = self.convertTime(line)
                         self.ds.writeEvent(line.replace('||', '|CatoNetworks|'))
-
                 except Exception as e:
                     traceback.print_exc()
                     self.ds.log('ERROR', 'Unzipping %s' %(filename))
@@ -67,7 +77,7 @@ class integration(object):
             elif retcode == 403:
                 filename = mystate['last'] + '.zip'
                 url = "%s/%s/%s" %(bucket, api_key, filename)
-                self.ds.log('DEBUG', "URL: %s" % url)
+                #self.ds.log('DEBUG', "URL: %s" % url)
                 try:
                     f = urlopen(url)
                     with open(filename, "wb") as local_file:
@@ -93,6 +103,7 @@ class integration(object):
                             event_list += foofile.readlines()
                         os.remove(filename)
                         for line in event_list:
+                            line = self.convertTime(line)
                             self.ds.writeEvent(line.replace('||', '|CatoNetworks|'))
                     except Exception as e:
                         traceback.print_exc()
