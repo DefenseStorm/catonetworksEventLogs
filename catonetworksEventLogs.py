@@ -72,7 +72,8 @@ class integration(object):
                         self.ds.writeEvent(line.replace('||', '|CatoNetworks|'))
                 except Exception as e:
                     traceback.print_exc()
-                    self.ds.log('ERROR', 'Unzipping %s' %(filename))
+                    self.ds.log('ERROR', 'Unzipping %s.  Check file contents for errors' %(filename))
+                    return
 
             elif retcode == 403:
                 filename = mystate['last'] + '.zip'
