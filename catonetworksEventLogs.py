@@ -37,7 +37,6 @@ class integration(object):
 
         while True:
             filename = "CATO" + '{:020d}'.format(mystate['last']) + ".zip"
-            print(filename)
         
             url = "%s/%s/%s" %(bucket, api_key, filename)
             self.ds.log('DEBUG', "URL: %s" % url)
@@ -46,13 +45,14 @@ class integration(object):
                 with open(filename, "wb") as local_file:
                     local_file.write(f.read())
             except HTTPError, e:
-                if e.code != 403:
-                    self.ds.log('ERROR', '%s %s' %(e.code, url))
+                self.ds.log('ERROR', '%s %s' %(e.code, url))
                 return
             except URLError, e:
                 self.ds.log('ERROR', '%s %s' %(e.reason, url))
                 pass
-            retcode = f.getcode()
+            except Exception, e:
+                self.ds.log('ERROR', '%s %s' %(e.reason, url))
+                return
     
             if retcode == 200:
                 mystate['last'] += 1
