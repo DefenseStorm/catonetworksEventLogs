@@ -53,7 +53,8 @@ class integration(object):
             except Exception, e:
                 self.ds.log('ERROR', '%s %s' %(e.reason, url))
                 return
-    
+   
+            retcode = f.getcode()
             if retcode == 200:
                 mystate['last'] += 1
                 mystate['count'] = 1
