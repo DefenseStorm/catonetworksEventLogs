@@ -26,12 +26,13 @@ class integration(object):
     def get_logs(self):
         bucket = self.ds.config_get('cato', 'BUCKET')
         api_key = self.ds.config_get('cato', 'API_KEY')
+        start_index = self.ds.config_get('cato', 'START_INDEX')
         self.state_dir = os.path.join(self.ds.config_get('cato', 'APP_PATH'), 'state')
         mystate = self.ds.get_state(self.state_dir)
 
         if mystate == None:
             mystate = {}
-            mystate['last'] = 0
+            mystate['last'] = start_index
             mystate['count'] = 0
 
 

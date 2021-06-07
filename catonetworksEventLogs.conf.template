@@ -11,3 +11,4 @@ CEF_VERSION = CEF:0
 BUCKET = 
 API_KEY = 
 APP_PATH = /usr/local/catonetworkEventLogs
+START_INDEX = 0
