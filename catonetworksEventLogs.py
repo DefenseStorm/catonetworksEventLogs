@@ -32,11 +32,12 @@ class integration(object):
 
         if mystate == None:
             mystate = {}
-            mystate['last'] = start_index
+            mystate['last'] = int(start_index)
             mystate['count'] = 0
 
 
         while True:
+            print(mystate)
             filename = "CATO" + '{:020d}'.format(mystate['last']) + ".zip"
         
             url = "%s/%s/%s" %(bucket, api_key, filename)
