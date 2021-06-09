@@ -60,8 +60,6 @@ class integration(object):
             retcode = f.getcode()
             if retcode == 200:
                 self.ds.log('INFO', 'Processing file %s.' %filename)
-                mystate['last'] += 1
-                mystate['count'] = 1
                 self.ds.set_state(self.state_dir, mystate)
                 try:
                     zipfile = ZipFile(filename)
