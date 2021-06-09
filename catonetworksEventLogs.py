@@ -3,6 +3,7 @@
 import sys,os,getopt
 import traceback
 import os
+import fcntl
 from urllib2 import urlopen, URLError, HTTPError
 from zipfile import ZipFile
 from StringIO import StringIO
@@ -92,10 +93,22 @@ class integration(object):
 
 
     def run(self):
-        self.ds.log('INFO', 'Getting logs')
-        self.get_logs()
-        #self.ds.writeCEFEvent()
-    
+        try:
+            pid_file = self.ds.config_get('cato', 'pid_file')
+            fp = open(pid_file, 'w')
+            try:
+                fcntl.lockf(fp, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except IOError:
+                self.ds.log('ERROR', "An instance of catonetworksEventLogs is already running")
+                # another instance is running
+                sys.exit(0)
+            self.ds.log('INFO', 'Getting logs')
+            self.get_logs()
+        except Exception as e:
+            traceback.print_exc()
+            self.ds.log('ERROR', "Exception {0}".format(str(e)))
+            return
+
     def usage(self):
         print
         print os.path.basename(__file__)

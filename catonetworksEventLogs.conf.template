@@ -12,3 +12,4 @@ BUCKET =
 API_KEY = 
 APP_PATH = /usr/local/catonetworkEventLogs
 START_INDEX = 0
+pid_file = ./catonetworksEventLogs.pid
