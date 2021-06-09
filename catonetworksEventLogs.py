@@ -37,18 +37,19 @@ class integration(object):
 
 
         while True:
-            print(mystate)
             filename = "CATO" + '{:020d}'.format(mystate['last']) + ".zip"
         
             url = "%s/%s/%s" %(bucket, api_key, filename)
-            self.ds.log('DEBUG', "URL: %s" % url)
             try:
                 f = urlopen(url)
                 with open(filename, "wb") as local_file:
                     local_file.write(f.read())
             except HTTPError, e:
-                self.ds.log('ERROR', '%s %s' %(e.code, url))
-                return
+                if e.code == 403:
+                    self.ds.log('INFO', 'File %s not available. No files to process or issue with START_INDEX' %filename)
+                    break
+                #self.ds.log('ERROR', '%s %s' %(e.code, url))
+                #return
             except URLError, e:
                 self.ds.log('ERROR', '%s %s' %(e.reason, url))
                 pass
@@ -58,6 +59,7 @@ class integration(object):
    
             retcode = f.getcode()
             if retcode == 200:
+                self.ds.log('INFO', 'Processing file %s.' %filename)
                 mystate['last'] += 1
                 mystate['count'] = 1
                 self.ds.set_state(self.state_dir, mystate)
@@ -77,45 +79,12 @@ class integration(object):
                     traceback.print_exc()
                     self.ds.log('ERROR', 'Unzipping %s.  Check file contents for errors' %(filename))
                     return
+                mystate['last'] += 1
+                mystate['count'] = 1
+                self.ds.set_state(self.state_dir, mystate)
 
-            elif retcode == 403:
-                filename = mystate['last'] + '.zip'
-                url = "%s/%s/%s" %(bucket, api_key, filename)
-                #self.ds.log('DEBUG', "URL: %s" % url)
-                try:
-                    f = urlopen(url)
-                    with open(filename, "wb") as local_file:
-                        local_file.write(f.read())
-                except HTTPError, e:
-                    self.ds.log('ERROR', '%s %s' %(e.code, url))
-                    return
-                except URLError, e:
-                    self.ds.log('ERROR', '%s %s' %(e.reason, url))
-                    pass
-                retcode = f.getcode()
-                if retcode == 200:
-                    mystate['last'] += 1
-                    mystate['count'] = 1
-                    self.ds.set_state(self.state_dir, mystate)
-                    try:
-                        zipfile = ZipFile(filename)
-                        zipfile.setpassword(api_key[:10])
-                        infolist = zipfile.infolist()
-                        event_list = []
-                        for item in infolist:
-                            foofile = zipfile.open(item)
-                            event_list += foofile.readlines()
-                        os.remove(filename)
-                        for line in event_list:
-                            line = self.convertTime(line)
-                            self.ds.writeEvent(line.replace('||', '|CatoNetworks|'))
-                    except Exception as e:
-                        traceback.print_exc()
-                        self.ds.log('ERROR', 'Unzipping %s' %(filename))
-                else:
-                    self.ds.log('ERROR', 'Unable to get any files')
-                    break
             elif mystate['count'] > num_failures:
+                self.ds.log('ERROR', 'Too many failures for file %s. Skipping.' %filename)
                 mystate['last'] += 1
                 mystate['count'] = 0
                 self.ds.set_state(self.state_dir, mystate)
