@@ -42,7 +42,7 @@ class integration(object):
         
             url = "%s/%s/%s" %(bucket, api_key, filename)
             try:
-                f = urlopen(url)
+                f = urlopen(url, timeout = 10)
                 with open(filename, "wb") as local_file:
                     local_file.write(f.read())
             except HTTPError, e:
