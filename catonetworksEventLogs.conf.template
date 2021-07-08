@@ -7,6 +7,10 @@ VERSION = 1.0
 SEVERITY = 5
 CEF_VERSION = CEF:0
 
+[json]
+app_name = catonetworks catonetworks
+version = 1.0
+
 [cato]
 BUCKET = 
 API_KEY = 
