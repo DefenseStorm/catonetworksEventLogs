@@ -17,6 +17,19 @@ num_failures = 5
 
 class integration(object):
 
+    JSON_field_mappings = {
+            'creationTime': 'timestamp',
+            'destinationIp': 'ip_dest',
+            'clientIp': 'client_ip',
+            'sourceIp': 'ip_src',
+            'server_port': 'service_port',
+            'prettyType': 'short_message',
+            'sourceCountry': 'src_location',
+            'destinationCountry': 'dest_location',
+            'destinationName': 'dest_host',
+    }
+
+
     def convertTime(self, mystring):
         if "rt=" in mystring:
             start = mystring.find("rt=")
@@ -81,8 +94,9 @@ class integration(object):
                         if "||" in line:
                             self.ds.writeEvent(line.replace('||', '|CatoNetworks|'))
                         else:
+                            line['message'] = line['prettyType'] + ' from ' + line['sourceIp'] + ' to ' + line['destinationIp']
                             json_event = json.loads(line)
-                            self.ds.writeJSONEvent(json_event)
+                            self.ds.writeJSONEvent(json_event, JSON_field_mappings = self.JSON_field_mappings)
                 except Exception as e:
                     traceback.print_exc()
                     self.ds.log('ERROR', 'Unzipping %s.  Check file contents for errors' %(filename))
