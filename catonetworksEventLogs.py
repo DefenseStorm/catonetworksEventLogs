@@ -101,7 +101,6 @@ class integration(object):
                             if 'destinationIp' in json_event.keys():
                                 json_event['message'] = json_event['message'] + ' to ' + json_event['destinationIp']
 
-                            json_event['message'] = json_event['prettyType'] + ' from ' + json_event['sourceIp'] + ' to ' + json_event['destinationIp']
                             self.ds.writeJSONEvent(json_event, JSON_field_mappings = self.JSON_field_mappings)
                 except Exception as e:
                     traceback.print_exc()
