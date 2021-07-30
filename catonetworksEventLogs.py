@@ -94,8 +94,8 @@ class integration(object):
                         if "||" in line:
                             self.ds.writeEvent(line.replace('||', '|CatoNetworks|'))
                         else:
-                            line['message'] = line['prettyType'] + ' from ' + line['sourceIp'] + ' to ' + line['destinationIp']
                             json_event = json.loads(line)
+                            json_event['message'] = json_event['prettyType'] + ' from ' + json_event['sourceIp'] + ' to ' + json_event['destinationIp']
                             self.ds.writeJSONEvent(json_event, JSON_field_mappings = self.JSON_field_mappings)
                 except Exception as e:
                     traceback.print_exc()
