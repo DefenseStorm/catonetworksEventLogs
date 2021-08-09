@@ -104,7 +104,7 @@ class integration(object):
                             self.ds.writeJSONEvent(json_event, JSON_field_mappings = self.JSON_field_mappings)
                 except Exception as e:
                     traceback.print_exc()
-                    self.ds.log('ERROR', 'Unzipping %s.  Check file contents for errors' %(filename))
+                    self.ds.log('ERROR', 'Processing file %s.  Error: %s' %(filename, str(e)))
                     return
                 mystate['last'] += 1
                 mystate['count'] = 1
