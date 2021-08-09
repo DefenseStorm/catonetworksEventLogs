@@ -97,6 +97,8 @@ class integration(object):
                             json_event = json.loads(line)
                             if 'prettyType' in json_event.keys():
                                 json_event['message'] = json_event['prettyType']
+                            else:
+                                json_event['message'] = 'NoType'
                             if 'sourceIp' in json_event.keys():
                                 json_event['message'] = json_event['message'] + ' from ' + json_event['sourceIp']
                             if 'destinationIp' in json_event.keys():
