@@ -31,7 +31,7 @@ class integration(object):
 
 
     def convertTime(self, mystring):
-        if "rt=" in mystring:
+        if "||" in mystring and "rt=" in mystring:
             start = mystring.find("rt=")
             timestring = mystring[start + 3:start + 31]
             dt = datetime.strptime(timestring, "%a %b %d %H:%M:%S %Z %Y")
