@@ -108,6 +108,9 @@ class integration(object):
                 except Exception as e:
                     traceback.print_exc()
                     self.ds.log('ERROR', 'Processing file %s.  Error: %s' %(filename, str(e)))
+                    mystate['last'] += 1
+                    mystate['count'] = 1
+                    self.ds.set_state(self.state_dir, mystate)
                     return
                 mystate['last'] += 1
                 mystate['count'] = 1
