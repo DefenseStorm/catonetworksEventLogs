@@ -1,13 +1,13 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys,os,getopt
 import traceback
 import os
 import fcntl
 import json
-from urllib2 import urlopen, URLError, HTTPError
+from urllib.request import urlopen, URLError, HTTPError
 from zipfile import ZipFile
-from StringIO import StringIO
+from io import StringIO
 from datetime import datetime
 
 sys.path.insert(0, './ds-integration')
@@ -63,22 +63,20 @@ class integration(object):
                 f = urlopen(url, timeout = 10)
                 with open(filename, "wb") as local_file:
                     local_file.write(f.read())
-            except HTTPError, e:
+            except HTTPError as e:
                 if e.code == 403:
-                    self.ds.log('INFO', 'File %s not available. No files to process or issue with START_INDEX' %filename)
+                    self.ds.logger.info('File %s not available. No files to process or issue with START_INDEX' %filename)
                     break
-                #self.ds.log('ERROR', '%s %s' %(e.code, url))
-                #return
-            except URLError, e:
-                self.ds.log('ERROR', '%s %s' %(e.reason, url))
+            except URLError as e:
+                self.ds.logger.errro('%s %s' %(e.reason, url))
                 pass
-            except Exception, e:
-                self.ds.log('ERROR', '%s %s' %(e.reason, url))
+            except Exception as e:
+                self.ds.logger.error('%s %s' %(e.reason, url))
                 return
    
             retcode = f.getcode()
             if retcode == 200:
-                self.ds.log('INFO', 'Processing file %s.' %filename)
+                self.ds.logger.info('Processing file %s.' %filename)
                 self.ds.set_state(self.state_dir, mystate)
                 try:
                     zipfile = ZipFile(filename)
@@ -107,7 +105,7 @@ class integration(object):
                             self.ds.writeJSONEvent(json_event, JSON_field_mappings = self.JSON_field_mappings)
                 except Exception as e:
                     traceback.print_exc()
-                    self.ds.log('ERROR', 'Processing file %s.  Error: %s' %(filename, str(e)))
+                    self.ds.logger.error('Processing file %s.  Error: %s' %(filename, str(e)))
                     mystate['last'] += 1
                     mystate['count'] = 1
                     self.ds.set_state(self.state_dir, mystate)
@@ -117,7 +115,7 @@ class integration(object):
                 self.ds.set_state(self.state_dir, mystate)
 
             elif mystate['count'] > num_failures:
-                self.ds.log('ERROR', 'Too many failures for file %s. Skipping.' %filename)
+                self.ds.logger.error('Too many failures for file %s. Skipping.' %filename)
                 mystate['last'] += 1
                 mystate['count'] = 0
                 self.ds.set_state(self.state_dir, mystate)
@@ -133,28 +131,28 @@ class integration(object):
             try:
                 fcntl.lockf(fp, fcntl.LOCK_EX | fcntl.LOCK_NB)
             except IOError:
-                self.ds.log('ERROR', "An instance of catonetworksEventLogs is already running")
+                self.ds.logger.error("An instance of catonetworksEventLogs is already running")
                 # another instance is running
                 sys.exit(0)
-            self.ds.log('INFO', 'Getting logs')
+            self.ds.logger.info('Getting logs')
             self.get_logs()
         except Exception as e:
             traceback.print_exc()
-            self.ds.log('ERROR', "Exception {0}".format(str(e)))
+            self.ds.logger.error("Exception {0}".format(str(e)))
             return
 
     def usage(self):
-        print
-        print os.path.basename(__file__)
-        print
-        print '  No Options: Run a normal cycle'
-        print
-        print '  -t    Testing mode.  Do all the work but do not send events to GRID via '
-        print '        syslog Local7.  Instead write the events to file \'output.TIMESTAMP\''
-        print '        in the current directory'
-        print
-        print '  -l    Log to stdout instead of syslog Local6'
-        print
+        print('')
+        print(os.path.basename(__file__))
+        print('')
+        print('  No Options: Run a normal cycle')
+        print('')
+        print('  -t    Testing mode.  Do all the work but do not send events to GRID via ')
+        print('        syslog Local7.  Instead write the events to file \'output.TIMESTAMP\'')
+        print('        in the current directory')
+        print('')
+        print('  -l    Log to stdout instead of syslog Local6')
+        print('')
     
     def __init__(self, argv):
 
@@ -178,10 +176,10 @@ class integration(object):
     
         try:
             self.ds = DefenseStorm('catonetworksEventLogs', testing=self.testing, send_syslog = self.send_syslog)
-        except Exception ,e:
+        except Exception as e:
             traceback.print_exc()
             try:
-                self.ds.log('ERROR', 'ERROR: ' + str(e))
+                self.ds.logger.error('ERROR: ' + str(e))
             except:
                 pass
 
