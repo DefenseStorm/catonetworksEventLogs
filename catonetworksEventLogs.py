@@ -54,7 +54,6 @@ class integration(object):
             mystate['last'] = int(start_index)
             mystate['count'] = 0
 
-
         while True:
             filename = "CATO" + '{:020d}'.format(mystate['last']) + ".zip"
         
@@ -80,14 +79,15 @@ class integration(object):
                 self.ds.set_state(self.state_dir, mystate)
                 try:
                     zipfile = ZipFile(filename)
-                    zipfile.setpassword(api_key[:10])
+                    zipfile.setpassword(api_key[:10].encode('utf-8'))
                     infolist = zipfile.infolist()
                     event_list = []
                     for item in infolist:
                         foofile = zipfile.open(item)
                         event_list += foofile.readlines()
                     os.remove(filename)
-                    for line in event_list:
+                    for bline in event_list:
+                        line = bline.decode('utf-8')
                         line = self.convertTime(line)
                         if "||" in line:
                             self.ds.writeEvent(line.replace('||', '|CatoNetworks|'))
